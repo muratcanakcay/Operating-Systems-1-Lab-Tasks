@@ -1,10 +1,3 @@
-/*----------------------------------------
-I declare that this piece of work which is the basis 
-for recognition of achieving learning outcomes in the
-OPS1 course was completed on my own.
-Muratcan Akcay 303026
------------------------------------------*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
