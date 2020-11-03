@@ -49,7 +49,7 @@ void show_db(char* filename)
     printf("Database filename: %s\n",filename);
     while (fgets(line, ((MAX_LENGTH * 2) + 2), s1) != NULL)
     {  
-        lock_flag = (strcmp(line, lock) == 0) ? 1 : 0;  // if XXX encountered file is locked
+        if ((lock_flag = (strcmp(line, lock) == 0) ? 1 : 0)) break;;  // if XXX encountered file is locked and EOF
         printf("%s", line);
     }
 
