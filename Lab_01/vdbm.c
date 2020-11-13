@@ -106,7 +106,7 @@ void vote(char** argv)
 
     if (found_flag)
     {
-        if(fseek(s1, (65 * (line_no - 1)) + 32, SEEK_SET)) ERR("fseek"); // move to the position
+        if(fseek(s1, ( (2*MAX_LENGTH + 1) * (line_no - 1) ) + MAX_LENGTH, SEEK_SET)) ERR("fseek"); // move to the position
         fprintf(s1, "%ld", l_votes + diff);  // update votes
     }
     else
