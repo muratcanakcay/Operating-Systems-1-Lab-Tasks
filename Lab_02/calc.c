@@ -48,27 +48,31 @@ void sigchld_handler(int sig)
 void child_work(sigset_t* oldmask, int n) 
 {    
     int c = 0;
-    long counter = 0;
     int fd;
-    char* name = malloc(255 * sizeof(char));
+    long counter = 0;
     char* numbuf = malloc(255 * sizeof(char));
+    
+    //char* numbuf = malloc(255 * sizeof(char));   
+    int length = snprintf(NULL, 0, "%d", n);  // get the length of n 
+    char* name = malloc( (length * sizeof(char)) + 1);  // allocate buffer to store n as as a string
+    snprintf(name, 255, "state.%d", n);   // create name string: "state.XX"  
+
     struct stat st;
-
-    snprintf(name, 255, "state.%d", n);
-
     if((fd=open(name,O_RDONLY|O_CREAT, 0777)) < 0) ERR("open");   
     if (stat(name, &st) < 0) ERR("stat");
+    
     if (st.st_size >= sizeof(int))
         {
             if (read(fd, numbuf, st.st_size) < 0) ERR("read");             
             counter = atol(numbuf);
         }
+    
     close(fd);   
     
     srand(time(NULL)*getpid());
     int alrm = 2 + rand() % 9;
 
-    fprintf(stderr, "Child %d with PID: [%d] Startingc ounter: %ld\n", n, getpid(), counter);   
+    fprintf(stderr, "Child %d with PID: [%d] Starting counter: %ld\n", n, getpid(), counter);   
 
     while(1)
     { 
@@ -111,12 +115,16 @@ void parent_work(int m)
 	
     while(1)
     {
+        char* buf = malloc(255 * sizeof(char));
+        
         printf("Enter number of signals to send (exit to exit):\n"); 
-        char* buf = calloc(255, sizeof(char));
-        fscanf(stdin, "%s", buf);
+        fscanf(stdin, "%s", buf);        
+        
         if (0 == strcmp(buf, "exit")) break;
+       
         num = atoi(buf);
         free(buf);
+       
         if (num < 2 || num > 20) 
         { 
             printf("Number should be between 2-20\n"); 
