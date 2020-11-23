@@ -7,7 +7,7 @@
 #include <string.h>
 #include <time.h>
 #include <fcntl.h>
-#include <sys/stat.h>
+
 
 #define ERR(source) (fprintf(stderr,"%s:%d\n",__FILE__,__LINE__),\
                      perror(source),kill(0,SIGKILL),\
@@ -48,31 +48,22 @@ void sigchld_handler(int sig)
 void child_work(sigset_t* oldmask, int n) 
 {    
     int c = 0;
-    int fd;
-    long counter = 0;
-    char* numbuf = malloc(255 * sizeof(char));
+    int counter = 0;
+    int fd, fsize;    
+    char fname[255];
     
-    //char* numbuf = malloc(255 * sizeof(char));   
-    int length = snprintf(NULL, 0, "%d", n);  // get the length of n 
-    char* name = malloc( (length * sizeof(char)) + 1);  // allocate buffer to store n as as a string
-    snprintf(name, 255, "state.%d", n);   // create name string: "state.XX"  
+    snprintf(fname, 255, "state.%248d", n);   // create name string: "state.XX"  
 
-    struct stat st;
-    if((fd=open(name,O_RDONLY|O_CREAT, 0777)) < 0) ERR("open");   
-    if (stat(name, &st) < 0) ERR("stat");
-    
-    if (st.st_size >= sizeof(int))
-        {
-            if (read(fd, numbuf, st.st_size) < 0) ERR("read");             
-            counter = atol(numbuf);
-        }
-    
+    if((fd=open(fname,O_RDONLY|O_CREAT, 0777)) < 0) ERR("open");       
+    if ((fsize = read(fd, &counter, sizeof(int))) < 0) ERR("read");
+    if (fsize < sizeof(int)) counter = 0;            
+       
     close(fd);   
     
     srand(time(NULL)*getpid());
     int alrm = 2 + rand() % 9;
 
-    fprintf(stderr, "Child %d with PID: [%d] Starting counter: %ld\n", n, getpid(), counter);   
+    fprintf(stderr, "Child %d with PID: [%d] Starting counter: %d\n", n, getpid(), counter);   
 
     while(1)
     { 
@@ -85,23 +76,19 @@ void child_work(sigset_t* oldmask, int n)
             c++; 
         else if (last_signal == SIGUSR2)
         {            
-            fprintf(stderr, "Child %d with PID: [%d] Signals received: %d. Old Counter: %ld New Counter: ", n, getpid(), c, counter);
+            fprintf(stderr, "Child %d with PID: [%d] Signals received: %d. Old Counter: %d New Counter: ", n, getpid(), c, counter);
             counter += (c * (-2 + rand()%(5)));
-            fprintf(stderr, "%ld\n", counter);
+            fprintf(stderr, "%d\n", counter);
             c = 0;
         }
         else if (last_signal == SIGTERM) 
             break; 
     }
+      
+    if((fd=open(fname, O_WRONLY|O_TRUNC, 0777)) < 0) ERR("open");
+    if(write(fd, &counter, sizeof(int)) < 0) ERR("write");
 
-    snprintf(numbuf, 255, "%ld", counter);    
-    
-    if((fd=open(name,O_WRONLY|O_TRUNC, 0777)) < 0) ERR("open");
-    if((write(fd, numbuf, strlen(numbuf)))<0) ERR("write");
-
-    close(fd);
-    free(numbuf);
-    free(name);
+    close(fd);    
     
     // nanosleep(&t,NULL); 
     // printf("Child PID: [%d] I was sleeping for %d ms.\n", getpid(), s);   
@@ -110,20 +97,19 @@ void child_work(sigset_t* oldmask, int n)
 void parent_work(int m) 
 {
 	
-    int num;    
+    int num, fs = 1;    
     struct timespec t = {0, m*1000000};    
+    char buf[255];
 	
     while(1)
-    {
-        char* buf = malloc(255 * sizeof(char));
+    {        
+        if (fs > 0) printf("Enter number of signals to send (exit to exit):\n"); 
         
-        printf("Enter number of signals to send (exit to exit):\n"); 
-        fscanf(stdin, "%s", buf);        
+        if ((fs = fscanf(stdin, "%255s", buf)) < 0) ERR("fscanf");
+        else if (fs == 0) continue;
         
         if (0 == strcmp(buf, "exit")) break;
-       
-        num = atoi(buf);
-        free(buf);
+        num = atoi(buf);        
        
         if (num < 2 || num > 20) 
         { 
@@ -185,6 +171,7 @@ int main(int argc, char** argv) {
     sigaddset(&mask, SIGUSR2);
     sigaddset(&mask, SIGTERM);
     sigaddset(&mask, SIGALRM);
+    sigaddset(&mask, SIGCHLD);
 	sigprocmask(SIG_BLOCK, &mask, &oldmask);
     
     create_children(&oldmask, n);
