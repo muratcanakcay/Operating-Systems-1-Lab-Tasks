@@ -20,7 +20,7 @@ void sethandler(void (*f)(int), int sigNo)
 	struct sigaction act;
 	memset(&act, 0, sizeof(struct sigaction));
 	act.sa_handler = f;
-	if (-1==sigaction(sigNo, &act, NULL)) ERR("sigaction");
+	if (-1 == sigaction(sigNo, &act, NULL)) ERR("sigaction");
 }
 
 void sig_handler(int sig) 
@@ -31,6 +31,8 @@ void sig_handler(int sig)
 void sigchld_handler(int sig) 
 {
 	pid_t pid;
+
+    // fprintf(stderr, "****** SIGCHLD triggered\n");   
     
     for(;;)
     {
@@ -48,15 +50,17 @@ void sigchld_handler(int sig)
 void child_work(sigset_t* oldmask, int n) 
 {    
     int c = 0;
-    int counter = 0;
-    int fd, fsize;    
-    char fname[255];
+    int fd, state;
+    int counter = 0;    
     
-    snprintf(fname, 255, "state.%248d", n);   // create name string: "state.XX"  
+    char name[255];
+    
+    snprintf(name, 255, "state.%248d", n);   // create name string: "state.XX"  
 
-    if((fd=open(fname,O_RDONLY|O_CREAT, 0777)) < 0) ERR("open");       
-    if ((fsize = read(fd, &counter, sizeof(int))) < 0) ERR("read");
-    if (fsize < sizeof(int)) counter = 0;            
+    if((fd=open(name,O_RDONLY|O_CREAT, 0777)) < 0) ERR("open");       
+        
+    if ((state = read(fd, &counter, sizeof(int))) < 0) ERR("read");
+    if (state < sizeof(int)) counter = 0;            
        
     close(fd);   
     
@@ -85,7 +89,7 @@ void child_work(sigset_t* oldmask, int n)
             break; 
     }
       
-    if((fd=open(fname, O_WRONLY|O_TRUNC, 0777)) < 0) ERR("open");
+    if((fd=open(name, O_WRONLY|O_TRUNC, 0777)) < 0) ERR("open");
     if(write(fd, &counter, sizeof(int)) < 0) ERR("write");
 
     close(fd);    
@@ -104,11 +108,14 @@ void parent_work(int m)
     while(1)
     {        
         if (fs > 0) printf("Enter number of signals to send (exit to exit):\n"); 
+        fs = fscanf(stdin, "%255s", buf);
         
-        if ((fs = fscanf(stdin, "%255s", buf)) < 0) ERR("fscanf");
-        else if (fs == 0) continue;
+        //printf("PID: %lu, fs value: %d, buf: %s\n", (long)getpid(), fs, buf); 
         
+        if (fs <= 0) continue; // -1 err -> errno set. 
+
         if (0 == strcmp(buf, "exit")) break;
+       
         num = atoi(buf);        
        
         if (num < 2 || num > 20) 
@@ -171,7 +178,8 @@ int main(int argc, char** argv) {
     sigaddset(&mask, SIGUSR2);
     sigaddset(&mask, SIGTERM);
     sigaddset(&mask, SIGALRM);
-    sigaddset(&mask, SIGCHLD);
+    //sigaddset(&mask, SIGCHLD); // completely stops SIGCHLD signals
+
 	sigprocmask(SIG_BLOCK, &mask, &oldmask);
     
     create_children(&oldmask, n);
