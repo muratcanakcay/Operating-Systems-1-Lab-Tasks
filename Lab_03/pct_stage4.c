@@ -95,7 +95,7 @@ int main(int argc, char** argv)
         char buf[9];
         int num;
 
-        scanf("%8s %d", buf, &num);  // I have to review strings!!!
+        scanf("%8s %d", buf, &num);  
 
         if(strlen(buf)>7) ERR("Input  too long");
         
@@ -117,7 +117,6 @@ int main(int argc, char** argv)
             {
                 printf("Sending USR1\n");
                 kill(0, SIGUSR1);
-                //sleep(1);
             }
             fflush(stdin);
         }
@@ -138,7 +137,7 @@ int main(int argc, char** argv)
 
 void readArguments(int argc, char** argv, int* n, int* m, int* k)
 {
-	if (argc != 4)  // why didn't they work??
+	if (argc != 4)  
     {
         *n = DEFAULT_N;
         *m = DEFAULT_M;
@@ -165,7 +164,7 @@ void* work(void *voidArgs)
     int sigNo;
     int rr, rc;
 
-    printf("My TID : [%d]\n", (int)args->tid); // why negative?
+    printf("My TID : [%d]\n", (int)args->tid); 
     sleep(1);
     printf("My TID after 1 sec: [%d]\n", (int)args->tid);   
 

@@ -1,11 +1,3 @@
-// By decree 27/2020 of University Rector you must add the following statement to the
-// uploads:
-// ------------------------------------------------------------------------
-// I declare that this piece of work which is the basis for recognition of
-// achieving learning outcomes in the OPS1 course was completed on my own.
-// [First and last name] [Student record book number (Student ID number)]
-// ------------------------------------------------------------------------
-
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -18,16 +10,12 @@
 #include <errno.h>
 #include <signal.h>
 
-#define MAXLINE 4096
 #define DEFAULT_N 10
 #define DEFAULT_M 10
 #define DEFAULT_K 10
-#define ELAPSED(start,end) ((end).tv_sec-(start).tv_sec)+(((end).tv_nsec - (start).tv_nsec) * 1.0e-9)
 #define ERR(source) (perror(source),\
 		     fprintf(stderr,"%s:%d\n",__FILE__,__LINE__),\
 		     exit(EXIT_FAILURE))
-
-volatile sig_atomic_t last_signal = 0; 
 
 typedef unsigned int UINT;
 typedef struct threadArgs 
@@ -41,24 +29,8 @@ typedef struct threadArgs
     pthread_mutex_t* mxRows;
  } threadArgs_t;
 
-
 void readArguments(int argc, char** argv, int *n, int* m, int* k);
 void* work(void *voidArgs);
-
-void sethandler( void (*f)(int), int sigNo) 
-{
-        struct sigaction act;
-        memset(&act, 0, sizeof(struct sigaction));
-        act.sa_handler = f;
-        if (-1==sigaction(sigNo, &act, NULL)) ERR("sigaction");
-}
-
-void sig_handler(int sig) 
-{
-
-    printf("[%d] received signal %d\n", getpid(), sig);
-    last_signal = sig;
-}
 
 int main(int argc, char** argv) 
 {
