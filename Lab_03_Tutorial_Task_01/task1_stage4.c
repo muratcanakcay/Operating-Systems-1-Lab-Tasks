@@ -26,13 +26,13 @@ typedef struct timespec timespec_t;
 
 typedef struct argsWork 
 {
-	pthread_t tid;
-	int arraySize;
+    pthread_t tid;
+    int arraySize;
     UINT seed;
     int* arrayCount;
- 	double* array;
+    double* array;
     double* resultarray;
- 	pthread_mutex_t* mxCells;	    
+    pthread_mutex_t* mxCells;	    
 } argsWork_t;
 
 void ReadArguments(int argc, char** argv, int *arraySize, int* threadCount);
@@ -42,34 +42,34 @@ void* work(void*);
 
 int main(int argc, char** argv) 
 {
-	srand(time(NULL));
-    
+    srand(time(NULL));
+
     int arraySize, threadCount;
-    double *array, *resultarray;	
+    double *array, *resultarray;
 
-	ReadArguments(argc, argv, &arraySize, &threadCount);
+    ReadArguments(argc, argv, &arraySize, &threadCount);
 
-	pthread_mutex_t mxCells[arraySize];
+    pthread_mutex_t mxCells[arraySize];
     for (int i =0; i < arraySize; i++) // set bins to zero and initialize mutexes for bins
-        {            
-            if(pthread_mutex_init(&mxCells[i], NULL)) ERR("Couldn't initialize mutex!");		
-        }
+    {
+        if(pthread_mutex_init(&mxCells[i], NULL)) ERR("Couldn't initialize mutex!");
+    }
 
     int arrayCount = arraySize;
 
-	if(NULL==(array = (double*) malloc(sizeof(double) * arraySize))) ERR("Malloc error for array!");
+    if(NULL==(array = (double*) malloc(sizeof(double) * arraySize))) ERR("Malloc error for array!");
     if(NULL==(resultarray = (double*) malloc(sizeof(double) * arraySize))) ERR("Malloc error for array!");
     argsWork_t* args = (argsWork_t*) malloc(sizeof(argsWork_t) * threadCount);
 
-	for (int i =0; i < arraySize; i++)
-    { 
-		UINT r = (UINT)rand();
+    for (int i =0; i < arraySize; i++)
+    {
+        UINT r = (UINT)rand();
         array[i] = NEXT_DOUBLE(&r);
         resultarray[i] = 0.0;
-    }    
-		
-	for (int i =0; i < threadCount; i++) 
-	{
+    }
+
+	for (int i =0; i < threadCount; i++)
+    {
         args[i].seed = rand();
         args[i].arraySize = arraySize;
         args[i].array = array;
@@ -80,36 +80,35 @@ int main(int argc, char** argv)
 	
 	for(int i = 0; i < threadCount; i++)  // create threads
         if(pthread_create(&args[i].tid, NULL, work, &args[i])) ERR("Couldn't create signal handling thread!");
-   
-
-	for(int i = 0; i < threadCount; i++)  // wait for threads
-	{	
-		if(pthread_join(args[i].tid, NULL)) ERR("Can't join with 'signal handling' thread");
+    
+    for(int i = 0; i < threadCount; i++)  // wait for threads
+    {
+        if(pthread_join(args[i].tid, NULL)) ERR("Can't join with 'signal handling' thread");
 		//printf("Thread %d joined\n", i);
-	}
+    }
 
     printArray(array, arraySize);
     printArray(resultarray, arraySize);
-	free(array);
-	
-	exit(EXIT_SUCCESS);
+    free(array);
+    
+    exit(EXIT_SUCCESS);
 }
 
 void ReadArguments(int argc, char** argv, int *arraySize, int* threadCount)
 {
-	*arraySize = DEFAULT_ARRAYSIZE;
+    *arraySize = DEFAULT_ARRAYSIZE;
     *threadCount = DEFAULT_THREADCOUNT;
 
 	if (argc >= 2) 
-	{
-		*arraySize = atoi(argv[1]);
+    {
+        *arraySize = atoi(argv[1]);
 		
-		if (*arraySize <= 0) 
-		{
-			printf("Invalid value for 'array size'");
-			exit(EXIT_FAILURE);
-		}
-	}
+        if (*arraySize <= 0) 
+        {   
+            printf("Invalid value for 'array size'");
+            exit(EXIT_FAILURE);
+        }
+    }
 }
 
 void msleep(UINT milisec) 
@@ -120,28 +119,27 @@ void msleep(UINT milisec)
     req.tv_sec = sec;
     req.tv_nsec = milisec * 1000000L;
     
-	if(nanosleep(&req, &req)) ERR("nanosleep");
+    if(nanosleep(&req, &req)) ERR("nanosleep");
 }
 
 void printArray(double* array, int arraySize) 
 {
-	printf("[");
+    printf("[");
 
-	for (int i =0; i < arraySize; i++)		
-			printf(" %f", array[i]);
+    for (int i =0; i < arraySize; i++)		
+        printf(" %f", array[i]);
 
-	printf(" ]\n");
+    printf(" ]\n");
 }
 
 void* work(void* voidArgs) 
 {
-	argsWork_t* args = voidArgs;
-	bool repeat = true;
+    argsWork_t* args = voidArgs;
+    bool repeat = true;
     int idx;    
     
     while (*(args->arrayCount) != 0)
     {
-                
         idx = rand_r(&args->seed) % (args->arraySize);
         pthread_mutex_lock(&args->mxCells[idx]);
         
@@ -163,7 +161,7 @@ void* work(void* voidArgs)
         msleep(100);
     }
 
-    msleep(100);    
-			
-	return NULL;
+    msleep(100);
+
+    return NULL;
 }
