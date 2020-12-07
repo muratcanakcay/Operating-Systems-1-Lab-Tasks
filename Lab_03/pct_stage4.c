@@ -141,15 +141,15 @@ int main(int argc, char** argv)
 
 void readArguments(int argc, char** argv, int* n, int* m, int* k)
 {
-	if (argc != 4)  
+	if (argc != 4)
     {
         *n = DEFAULT_N;
         *m = DEFAULT_M;
         *k = DEFAULT_K;            
 	}
 
-	if (argc == 4) 
-	{
+	if (argc == 4)
+    {
         *n = atoi(argv[1]);
         *m = atoi(argv[2]);
         *k = atoi(argv[3]);
@@ -159,7 +159,7 @@ void readArguments(int argc, char** argv, int* n, int* m, int* k)
             printf("Invalid value for 'n, m or k'");
             exit(EXIT_FAILURE);
         }
-	}
+    }
 }
 
 void* work(void *voidArgs)
