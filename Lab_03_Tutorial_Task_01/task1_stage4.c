@@ -14,7 +14,6 @@
 #define DEFAULT_ARRAYSIZE 7
 #define DEFAULT_THREADCOUNT 3
 
-
 // NEXT_DOUBLE returns a double value between 1 and 60
 #define NEXT_DOUBLE(seedptr) (((59.0 * (double) rand_r(seedptr) / (double) RAND_MAX)) + 1.0)
 
