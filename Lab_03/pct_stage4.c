@@ -84,10 +84,10 @@ int main(int argc, char** argv)
         threads[i].mask = &mask;
         threads[i].mxRows = mxRows;
     }
-    
-	// create threads
+
+    // create threads
     for (int i = 0; i < k; i++)
-	    if(pthread_create(&threads[i].tid, NULL, work, &threads[i])) ERR("Failed to create student thread!");
+        if(pthread_create(&threads[i].tid, NULL, work, &threads[i])) ERR("Failed to create student thread!");
 	
     // get input from stdin    
     while(true)
@@ -135,8 +135,8 @@ int main(int argc, char** argv)
 	// join with terminated threads
     for (int i = 0; i < k; i++) 
         if(pthread_join(threads[i].tid, NULL)) ERR("Failed to join with a thread!");
-	
-	exit(EXIT_SUCCESS);
+    
+    exit(EXIT_SUCCESS);
 }
 
 void readArguments(int argc, char** argv, int* n, int* m, int* k)
@@ -145,8 +145,9 @@ void readArguments(int argc, char** argv, int* n, int* m, int* k)
     {
         *n = DEFAULT_N;
         *m = DEFAULT_M;
-        *k = DEFAULT_K;            
-	}
+        *k = DEFAULT_K;
+    }
+
 	
     if (argc == 4)
     {
