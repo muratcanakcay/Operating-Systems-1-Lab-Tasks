@@ -70,7 +70,7 @@ int main(int argc, char** argv)
     sigaddset(&mask, SIGQUIT);
     sigaddset(&mask, SIGUSR1);
 
-    sigprocmask(SIG_BLOCK, &mask, &oldmask);
+    sigprocmask(SIG_BLOCK, &mask, &oldmask); // WRONG! : use pthread_sigmask(SIG_BLOCK, &mask, &oldmask); 
 
 
     for(int i=0;i<n;i++)
@@ -162,6 +162,8 @@ int main(int argc, char** argv)
         if(pthread_join(threads[i].tid, (void**) &res)!=0) ERR("Couldn't join thread");
         if(res != PTHREAD_CANCELED) ERR("Thread didn't cancel");
     }
+
+    sigprocmask(SIG_UNBLOCK, &mask, &oldmask); // WRONG AGAIN : use pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
 
     free(threads);
 }
