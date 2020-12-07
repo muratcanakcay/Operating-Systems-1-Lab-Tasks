@@ -99,7 +99,7 @@ void ReadArguments(int argc, char** argv, int *arraySize, int* threadCount)
     *arraySize = DEFAULT_ARRAYSIZE;
     *threadCount = DEFAULT_THREADCOUNT;
 
-	if (argc >= 2) 
+    if (argc >= 2) 
     {
         *arraySize = atoi(argv[1]);
 		
