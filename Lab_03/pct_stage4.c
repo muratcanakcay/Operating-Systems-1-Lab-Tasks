@@ -153,12 +153,12 @@ void readArguments(int argc, char** argv, int* n, int* m, int* k)
         *n = atoi(argv[1]);
         *m = atoi(argv[2]);
         *k = atoi(argv[3]);
-         
-		if (*n < 1 || *n > 100 || *m < 1 || *m > 100 || *k < 3 || *k > 100)
-		{
-			printf("Invalid value for 'n, m or k'");
-			exit(EXIT_FAILURE);
-		}
+        
+        if (*n < 1 || *n > 100 || *m < 1 || *m > 100 || *k < 3 || *k > 100)
+        {
+            printf("Invalid value for 'n, m or k'");
+            exit(EXIT_FAILURE);
+        }
 	}
 }
 
